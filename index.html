@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#111116">
+    <title>VALORANT GACHA</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="navbar">
+        <a class="logo" href="#" aria-label="Valorant Gacha">V<span>ALORANT</span> GACHA</a>
+        <div class="nav-right">AGENT · WEAPON · MAP RANDOMIZER</div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <p class="eyebrow">WELCOME TO THE PROTOCOL</p>
+            <h1>CHOOSE YOUR <span>DESTINY</span></h1>
+            <p>Let fate decide your next selection.</p>
+        </section>
+
+        <nav class="tab-menu" aria-label="Gacha categories">
+            <button class="tab-button active" data-tab="agents" type="button">AGENTS</button>
+            <button class="tab-button" data-tab="weapons" type="button">WEAPONS</button>
+            <button class="tab-button" data-tab="maps" type="button">MAPS</button>
+        </nav>
+
+        <section class="gacha-panel">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow" id="panelSubtitle">AGENT SELECTION</p>
+                    <h2 id="panelTitle">CHOOSE YOUR AGENT</h2>
+                </div>
+                <span class="system-status" id="systemStatus">● LOADING DATA</span>
+            </div>
+
+            <div class="toolbar">
+                <div class="filter-area" id="filterArea">
+                    <label for="roleFilter">FILTER BY ROLE</label>
+                    <select id="roleFilter">
+                        <option value="all">ALL ROLES</option>
+                        <option value="Duelist">DUELIST</option>
+                        <option value="Controller">CONTROLLER</option>
+                        <option value="Initiator">INITIATOR</option>
+                        <option value="Sentinel">SENTINEL</option>
+                    </select>
+                </div>
+                <p class="item-count" id="itemCount">LOADING ITEMS...</p>
+            </div>
+
+            <div class="selection-grid" id="selectionGrid" aria-live="polite">
+                <div class="loading-state">CONNECTING TO VALORANT DATA...</div>
+            </div>
+
+            <div class="selected-result">
+                <div>
+                    <p class="eyebrow">YOUR SELECTION</p>
+                    <h2 id="resultName">NOT SELECTED</h2>
+                    <p id="resultDetail">WAITING FOR YOUR ROLL...</p>
+                </div>
+                <div class="result-symbol" id="resultSymbol">?</div>
+            </div>
+
+            <div class="roll-area">
+                <button id="spinButton" class="spin-button" type="button" disabled>✦ ROLL AGENT</button>
+                <p class="hint" id="rollHint">ONE ROLL. ONE DESTINY.</p>
+            </div>
+        </section>
+
+        <section class="history-section">
+            <div class="history-heading">
+                <div>
+                    <p class="eyebrow">YOUR PREVIOUS ROLLS</p>
+                    <h2>GACHA HISTORY</h2>
+                </div>
+                <button id="clearHistory" class="clear-button" type="button">CLEAR HISTORY</button>
+            </div>
+            <div id="historyList" class="history-list">
+                <p class="empty-history">NO HISTORY AVAILABLE</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>VALORANT GACHA PROJECT</p>
+        <p>FAN-MADE WEBSITE · NOT AFFILIATED WITH RIOT GAMES</p>
+        <p class="data-credit">Game artwork and data are loaded from the community Valorant API.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
