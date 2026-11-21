@@ -5,6 +5,7 @@ const API = "https://valorant-api.com/v1";
 
 const state = {
     currentTab: "agents",
+    mapGroup: "large",
     isSpinning: false,
     data: {
         agents: [],
@@ -19,6 +20,7 @@ const elements = {
     resultName: document.getElementById("resultName"),
     resultDetail: document.getElementById("resultDetail"),
     resultSymbol: document.getElementById("resultSymbol"),
+    resultImage: document.getElementById("resultImage"),
     panelTitle: document.getElementById("panelTitle"),
     panelSubtitle: document.getElementById("panelSubtitle"),
     status: document.getElementById("systemStatus"),
@@ -29,7 +31,9 @@ const elements = {
     historyList: document.getElementById("historyList"),
     clearHistory: document.getElementById("clearHistory"),
     rollHint: document.getElementById("rollHint"),
-    tabButtons: document.querySelectorAll(".tab-button")
+    tabButtons: document.querySelectorAll(".tab-button"),
+    mapTabs: document.getElementById("mapTabs"),
+    mapTabButtons: document.querySelectorAll(".map-tab")
 };
 
 const tabSettings = {
@@ -52,6 +56,42 @@ const tabSettings = {
         hint: "LET FATE CHOOSE YOUR BATTLEFIELD."
     }
 };
+
+// Map groups inside the MAPS tab.
+const mapGroups = {
+    large: {
+        label: "LARGE MAPS",
+        title: "CHOOSE YOUR LARGE MAP",
+        subtitle: "LARGE MAP SELECTION",
+        hint: "LET FATE CHOOSE YOUR BATTLEFIELD."
+    },
+    skirmish: {
+        label: "SKIRMISH",
+        title: "CHOOSE YOUR SKIRMISH MAP",
+        subtitle: "SKIRMISH MAP SELECTION",
+        hint: "SMALL ARENA. BIG FIGHT."
+    }
+};
+
+// Team Deathmatch / practice maps that are removed from the MAPS tab.
+const excludedMaps = [
+    "gauntlet",
+    "district",
+    "kasbah",
+    "drift",
+    "glitch",
+    "piazza",
+    "basic training",
+    "the range"
+];
+
+function normalizeMapName(name) {
+    return String(name).trim().toLowerCase();
+}
+
+function getMapGroup(name) {
+    return normalizeMapName(name).startsWith("skirmish") ? "skirmish" : "large";
+}
 
 function loadHistory() {
     try {
@@ -81,8 +121,7 @@ async function fetchApi(endpoint) {
 
 async function loadGameData() {
     elements.status.textContent = "● LOADING DATA";
-    elements.grid.innerHTML =
-        '<div class="loading-state">CONNECTING TO VALORANT DATA...</div>';
+    elements.grid.innerHTML = '<div class="skeleton-tile"></div>'.repeat(10);
 
     try {
         const [agentData, weaponData, mapData] = await Promise.all([
@@ -114,9 +153,11 @@ async function loadGameData() {
 
         state.data.maps = mapData
             .filter(map => map.displayName && (map.splash || map.listViewIcon || map.displayIcon))
+            .filter(map => !excludedMaps.includes(normalizeMapName(map.displayName)))
             .map(map => ({
                 id: map.uuid,
                 name: map.displayName,
+                group: getMapGroup(map.displayName),
                 detail: "BATTLEFIELD",
                 image: map.splash || map.listViewIcon || map.displayIcon,
                 symbol: "✦"
@@ -141,6 +182,10 @@ function getCurrentItems() {
         if (role !== "all") {
             items = items.filter(agent => agent.detail === role);
         }
+    }
+
+    if (state.currentTab === "maps") {
+        items = items.filter(map => map.group === state.mapGroup);
     }
 
     return items;
@@ -211,11 +256,55 @@ function switchTab(tab) {
     elements.spinButton.textContent = settings.button;
     elements.rollHint.textContent = settings.hint;
     elements.filterArea.style.display = tab === "agents" ? "block" : "none";
+    elements.mapTabs.hidden = tab !== "maps";
 
+    if (tab === "maps") {
+        applyMapGroupText();
+    }
+
+    resetResult();
+    renderGrid();
+}
+
+function showResultImage(item) {
+    const img = elements.resultImage;
+    if (!item || !item.image) {
+        img.hidden = true;
+        img.removeAttribute("src");
+        return;
+    }
+    img.className = `result-image ${state.currentTab}`;
+    img.alt = item.name;
+    img.src = item.image;
+    img.hidden = false;
+    img.onerror = () => { img.hidden = true; };
+}
+
+function resetResult() {
+    showResultImage(null);
     elements.resultName.textContent = "NOT SELECTED";
     elements.resultDetail.textContent = "WAITING FOR YOUR ROLL...";
     elements.resultSymbol.textContent = "?";
+}
 
+function applyMapGroupText() {
+    const group = mapGroups[state.mapGroup];
+    elements.panelTitle.textContent = group.title;
+    elements.panelSubtitle.textContent = group.subtitle;
+    elements.rollHint.textContent = group.hint;
+}
+
+function switchMapGroup(group) {
+    if (state.isSpinning || !mapGroups[group] || state.currentTab !== "maps") return;
+
+    state.mapGroup = group;
+
+    elements.mapTabButtons.forEach(button => {
+        button.classList.toggle("active", button.dataset.group === group);
+    });
+
+    applyMapGroupText();
+    resetResult();
     renderGrid();
 }
 
@@ -243,7 +332,8 @@ async function spinGacha() {
     elements.resultDetail.textContent = "RANDOMIZING...";
     elements.resultSymbol.textContent = "✦";
 
-    const duration = 2800;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const duration = reduceMotion ? 600 : 2800;
     const start = Date.now();
     let activeIndex = -1;
 
@@ -269,6 +359,8 @@ async function spinGacha() {
     elements.resultName.textContent = winner.name;
     elements.resultDetail.textContent = winner.detail.toUpperCase();
     elements.resultSymbol.textContent = winner.symbol;
+    showResultImage(winner);
+    tiles[winnerIndex].scrollIntoView({ block: "nearest", behavior: "smooth" });
 
     addHistory(winner);
 
@@ -281,8 +373,11 @@ async function spinGacha() {
 function addHistory(item) {
     state.history.unshift({
         name: item.name,
-        category: state.currentTab.toUpperCase(),
+        category: state.currentTab === "maps"
+            ? `MAPS · ${mapGroups[state.mapGroup].label}`
+            : state.currentTab.toUpperCase(),
         detail: item.detail,
+        image: item.image || "",
         time: new Date().toLocaleString("vi-VN")
     });
 
@@ -305,6 +400,18 @@ function renderHistory() {
         row.className = "history-item";
 
         const info = document.createElement("div");
+        info.className = "history-info";
+
+        if (item.image) {
+            const thumb = document.createElement("img");
+            thumb.className = "history-thumb";
+            thumb.src = item.image;
+            thumb.alt = "";
+            thumb.loading = "lazy";
+            thumb.onerror = () => thumb.remove();
+            row.appendChild(thumb);
+        }
+
         const title = document.createElement("strong");
         title.textContent = `#${index + 1} ${item.name}`;
 
@@ -324,6 +431,12 @@ function renderHistory() {
 elements.tabButtons.forEach(button => {
     button.addEventListener("click", () => {
         switchTab(button.dataset.tab);
+    });
+});
+
+elements.mapTabButtons.forEach(button => {
+    button.addEventListener("click", () => {
+        switchMapGroup(button.dataset.group);
     });
 });
 
