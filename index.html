@@ -4,10 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#111116">
-    <title>VALORANT GACHA</title>
+    <title>VALORANT GACHA – Random Agent, Weapon & Map</title>
+    <meta name="description" content="Quay ngẫu nhiên đặc vụ, vũ khí và map Valorant. Có lọc theo vai trò, tab Large Maps / Skirmish và lịch sử roll.">
+    <meta property="og:title" content="VALORANT GACHA">
+    <meta property="og:description" content="Quay ngẫu nhiên đặc vụ, vũ khí và map Valorant.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23111116'/%3E%3Cpath d='M5 8l9 16 3-5-6-11zM27 8l-11 16h-5l11-16z' fill='%23ff4655'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <a class="skip-link" href="#selectionGrid">Bỏ qua tới danh sách</a>
     <header class="navbar">
         <a class="logo" href="#" aria-label="Valorant Gacha">V<span>ALORANT</span> GACHA</a>
         <div class="nav-right">AGENT · WEAPON · MAP RANDOMIZER</div>
@@ -35,6 +40,11 @@
                 <span class="system-status" id="systemStatus">● LOADING DATA</span>
             </div>
 
+            <nav class="map-tabs" id="mapTabs" aria-label="Map groups" hidden>
+                <button class="map-tab active" data-group="large" type="button">LARGE MAPS</button>
+                <button class="map-tab" data-group="skirmish" type="button">SKIRMISH</button>
+            </nav>
+
             <div class="toolbar">
                 <div class="filter-area" id="filterArea">
                     <label for="roleFilter">FILTER BY ROLE</label>
@@ -59,6 +69,7 @@
                     <h2 id="resultName">NOT SELECTED</h2>
                     <p id="resultDetail">WAITING FOR YOUR ROLL...</p>
                 </div>
+                <img class="result-image" id="resultImage" alt="" hidden>
                 <div class="result-symbol" id="resultSymbol">?</div>
             </div>
 
